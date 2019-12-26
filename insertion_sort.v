@@ -1,56 +1,45 @@
-From stdpp Require Import list orders.
+Require Import List Lia Arith Permutation.
+
+Import ListNotations.
 
 Section Sorting.
+
+  Check (list nat).
   
-  SearchAbout relation.
-  
-  Context {A : Type}.
-  
-  Context (R : relation A).
-  
-  Print PartialOrder.
-
-  Print AntiSymm.
-
-  Context `{TotalOrder A R}.
-
-  Locate "≤".
-
-  Notation "a ≤ b" := (R a b).
-
-  Notation "a < b" := (strict R a b).
-
   (* This is one of many possible definitions of Sorted.
      It's a useful exercise to prove they are equivalent! *)
-  Inductive Sorted : list A → Prop :=
+  Inductive Sorted : list nat -> Prop :=
   | nil_sorted : Sorted []
-  | singleton_sorted : ∀ a, Sorted [a]
-  | pair_sorted : ∀ a b l, a ≤ b → Sorted (b::l) → Sorted (a::b::l).
-
+  | singleton_sorted : forall a, Sorted [a]
+  | pair_sorted : forall a b l, a <= b -> Sorted (b::l) -> Sorted (a::b::l).
+  
   Hint Constructors Sorted.
 
-  Print RelDecision.
-
-  Context `{RelDecision _ _ R}.
-
-  Fixpoint insert (a : A) (l : list A) : list A :=
+  Fixpoint insert (a : nat) (l : list nat) : list nat :=
     match l with
     | [] => [a]
-    | b::bs => if decide (a ≤ b) then a::l
+    | b::bs => if (a <=? b) then a::l
                else b::(insert a bs)
     end.
 
-  Fixpoint sort (l : list A) : list A :=
+  Fixpoint sort (l : list nat) : list nat :=
     match l with
     | [] => []
     | b :: bs => insert b (sort bs)
     end.
 
-  (* Should use ints, so we can write a couple of tests here *)
+  Eval compute in (sort [3;4;5;2;5;6;3;2;2;46;87;8;0]).
 
+  SearchAbout (_ <=? _).
+  SearchAbout (BoolSpec).
+  SearchAbout Bool.reflect.
 
+  SearchAbout (_ < _ -> _ <= _).
+  
+  Hint Resolve Nat.lt_le_incl.
+  
   (* Our goal is this: *)
-  Theorem sorted_sort : ∀ l, Sorted (sort l).
+  Theorem sorted_sort : forall l, Sorted (sort l).
   Proof.
     induction l.
     - auto.
@@ -58,39 +47,25 @@ Section Sorting.
       
       unfold insert.
       case_eq (sort l); auto.
-      intros.
-      destruct (decide (a ≤ a0)).
+      intros a0 l0 H1.
+      destruct (Nat.leb_spec a a0).
       + constructor; rewrite H1 in *; now auto.
       + fold insert.
   Abort.
 
-  SearchAbout TotalOrder.
-  Print Trichotomy.
-  SearchAbout Trichotomy.
-
-  (* Somehow this lemma is missing, but it's easy to prove for a total order *)
-  Lemma antisym_neg : ∀ a b, ¬ a ≤ b → b ≤ a.
-  Proof.
-    intros.
-    generalize (trichotomy _ a b);
-      unfold strict; firstorder.
-  Qed.
-
-  Hint Resolve antisym_neg.
-  
-  Lemma sorted_insert : ∀ a l, Sorted l → Sorted (insert a l).
+  Lemma sorted_insert : forall a l, Sorted l -> Sorted (insert a l).
   Proof.
     intros a l srtd_l; induction srtd_l; simpl; auto.
-    destruct (decide (a ≤ a0)); simpl; constructor; auto.
-    destruct (decide (a ≤ a0)); auto.
+    destruct (Nat.leb_spec a a0); simpl; constructor; auto; lia.
+    destruct (Nat.leb_spec a a0); auto.
     revert IHsrtd_l.
     unfold insert.
-    destruct (decide (a ≤ b)); simpl; auto.
+    destruct (Nat.leb_spec a b); simpl; auto.
   Qed.
 
   Hint Resolve sorted_insert.
 
-  Theorem sorted_sort : ∀ l, Sorted (sort l).
+  Theorem sorted_sort : forall l, Sorted (sort l).
   Proof.
     induction l; simpl; auto.
   Qed.
@@ -100,29 +75,24 @@ Section Sorting.
 
   SearchAbout Permutation.
 
-  Lemma perm_insert : ∀ a l l', l' ≡ₚ l → a::l' ≡ₚ insert a l.
+  Notation "l1 ~ l2" := (Permutation l1 l2)(at level 80).
+
+  Lemma perm_insert : forall a l l', l' ~ l -> a::l' ~ insert a l.
   Proof.
     intros a l.
-    induction l; simpl; intros; auto.
-    destruct (decide (a ≤ a0)); auto.
-    setoid_rewrite H1.
-    setoid_rewrite Permutation_swap.
+    induction l; simpl; intros l' H; auto.
+    destruct (Nat.leb_spec a a0); auto.
+    setoid_rewrite H.
+    setoid_rewrite perm_swap.
     constructor.
     apply IHl; auto.
   Qed.
 
-  Theorem perm_sort : ∀ l, l ≡ₚ sort l.
+  Hint Resolve perm_insert.
+  
+  Theorem perm_sort : forall l, l ~ sort l.
   Proof.
     intro l; induction l; simpl; auto.
-    apply perm_insert; auto.
   Qed.
 
 End Sorting.
-
-
-Check sort.
-
-
-SearchAbout RelDecision.
-
-Eval compute in (sort le [3;2;3;4;5;5;3;6;78;0;1]).
