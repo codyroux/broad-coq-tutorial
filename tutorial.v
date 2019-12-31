@@ -111,7 +111,10 @@ Section Basics.
 
   (* Now let's define a membership function *)
   Fixpoint is_a_member (w : week_day) (l : week_day_list) : bool :=
-  (* ??? *)false.
+    match l with
+    | [] => false
+    | Cons w' ws => eq_wd w w' || is_a_member w ws
+    end.
 
   (* Let's test it: *)
   Eval compute in (is_a_member Monday work_week).
@@ -234,7 +237,7 @@ Section Basics.
   Proof.
     intros x.
     (* Because each case can be handled with the same tactic,
-       we can apply it to each subgoal, using the ";" combinator. *)    
+       we can apply it to each subgoal, using the ";" combinator. *)
     destruct x; compute; reflexivity.
   Qed.
 
@@ -274,3 +277,109 @@ Section Basics.
     - apply H.
     - apply H.
   Qed.
+
+  Lemma test10 : forall x y, x = Monday -> y = x -> y = Monday.
+  Proof.
+    intros x y H1 H2.
+    (* Rewrite replaces the lhs of an equality by its rhs *)
+    rewrite H2.
+    rewrite H1.
+    reflexivity.
+  Qed.
+  
+  (* Proofs involving equalities *)
+  Lemma test11 : Monday = Tuesday -> False.
+  Proof.
+    intro H.
+    (* This tactic is very powerful, but for now,
+       suffice to say that it can get contradictions from
+       C1 = C2 where C1 and C2 are constructors *)
+    inversion H.
+  Qed.
+
+  (* All right we're ready for some serious stuff *) 
+  Lemma first_real_lemma : forall x y, x = y -> eq_wd x y = true.
+  Proof.
+    intros x y.
+    intros H.
+    rewrite H.
+    (* We can just apply our Lemma test5 here! *)
+    apply test5.
+  Qed.
+    
+  
+  (* The other direction is harder! *)
+  Lemma second_real_lemma : forall x y, eq_wd x y = true -> x = y.
+  Proof.
+    intros x y.
+    intro H.
+    (* destruct x. *)
+    (* - destruct y. *)
+    (*   + reflexivity. *)
+    (*   + (* We can compute *in* hypotheses! *) *)
+    (*     compute in H. *)
+    (*     inversion H. *)
+    (*     (* ugh. *) *)
+    
+    (* This fails *)
+    (* destruct x; destruct y; reflexivity. *)
+
+    (* This doesn't fail, but it leaves some goals unsolved. *)
+    (* destruct x; destruct y; inversion H. *)
+
+    (* We can use the "try", which *never* fails, but may leave some goals unchanged! *)
+    destruct x; destruct y; try reflexivity; compute in H; congruence.
+    (* Cool! *)
+  Qed.
+
+  (* Now we have a program which we have proven correct! We can use this to prove some theorems! *)
+  Lemma test12 : Monday = Monday.
+  Proof.
+    apply second_real_lemma.
+    compute.
+    reflexivity.
+    (* Ok not overwhelming, but we can use this idea to prove harder things! *)
+  Qed.
+
+  
+  (* Let's show correctness of our membership function! But first we need to *specify* membership. *)
+  (* To do this, we specify an *inductive predicate*, which describes all the ways an element can be in a list. *)
+  (* We can again use the keyword inductive. *)
+  Inductive Mem : forall (w : week_day) (l : week_day_list), Prop :=
+  | Mem_head : forall w l, Mem w (Cons w l)
+  | Mem_tail : forall w w' l, Mem w l -> Mem w (Cons w' l).
+
+  (* The theorems we want are these: *)
+  Theorem is_a_member_correct : forall w l, is_a_member w l = true -> Mem w l.
+  Proof.
+    (* intros w l. *)
+    (* induction l. *)
+    (* - compute. *)
+    (*   intro H; inversion H. *)
+    (* - simpl. *)
+    (*   case_eq (eq_wd w w0); intros. *)
+    (*   + assert (w = w0). *)
+    (*     apply second_real_lemma. *)
+    (*     apply H. *)
+    (*     rewrite H1. *)
+    (*     apply Mem_head. *)
+    (*   + simpl in H0. *)
+    (*     apply Mem_tail. *)
+    (*     apply IHl. *)
+    (*     apply H0. *)
+  Abort.
+
+  Theorem is_a_member_complete : forall w l, Mem w l -> is_a_member w l = true.
+  Proof.
+    (* intros w l H; induction H. *)
+    (* - simpl. *)
+    (*   rewrite test5. *)
+    (*   simpl. *)
+    (*   reflexivity. *)
+    (* - simpl. *)
+    (*   rewrite IHMem. *)
+    (*   case (eq_wd w w'); reflexivity. *)
+  Abort.
+
+
+  (* Need to learn: simpl, induction *)
