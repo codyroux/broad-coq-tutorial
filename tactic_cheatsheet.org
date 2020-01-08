@@ -1,0 +1,11 @@
+|               |   in goal   |   in hypotheses   |
+|---------------+---------+---------------------- |
+| A -> B        |  intros     |      apply        |
+| A /\ B        |  split      |     destruct      |
+| A \/ B        |  left/right |     destruct      |
+| ~A            |  intro      |      apply        |
+|  True         |  trivial    |       N/A         |
+|  False        |    N/A      |   contradiction   |
+| forall x, P x |  intros     |      apply        |
+| exists x, P x |  exists t   |     destruct      |
+| t = u         | reflexivity | rewrite/inversion |

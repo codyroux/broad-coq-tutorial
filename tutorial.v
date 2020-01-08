@@ -147,6 +147,8 @@ Section Basics.
 
   (* We give some basic tools to prove some of these specs: *)
 
+
+  
   Lemma test1 : forall x y : week_day, x = y -> x = y.
   Proof.
     (* We now have a proof obligation! *)
@@ -168,6 +170,27 @@ Section Basics.
 
   (* We can check that test1 is indeed a proof of our specification by using the Check command *)
   Check test1.
+
+  (* ---------------------------------------------------------
+     There are some simple cheats on how to prove various kinds of specifications:
+     roughly, one can try certain tactics based on the *shape* of the goal and the
+     hypotheses. The breakdown is like this:
+
+     |               |   in goal   |   in hypotheses   |
+     |---------------+---------+---------------------- |
+     | A -> B        |  intros     |      apply        |
+     | A /\ B        |  split      |     destruct      |
+     | A \/ B        |  left/right |     destruct      |
+     | ~A            |  intro      |      apply        |
+     |  True         |  trivial    |       N/A         |
+     |  False        |    N/A      |   contradiction   |
+     | forall x, P x |  intros     |      apply        |
+     | exists x, P x |  exists t   |     destruct      |
+     | t = u         | reflexivity | rewrite/inversion |
+
+     but of course, these will not alway suffice in all situations.
+   *)
+
 
   (* Here's how one proves trivial equalities: *)
   Lemma test2 : Monday = Monday.
@@ -349,6 +372,31 @@ Section Basics.
   | Mem_head : forall w l, Mem w (Cons w l)
   | Mem_tail : forall w w' l, Mem w l -> Mem w (Cons w' l).
 
+
+  (* We can apply constructors of mem like lemmas *)
+  Lemma test13 : Mem Monday [Tuesday; Monday; Thursday].
+  Proof.
+    apply Mem_tail.
+    apply Mem_head.
+  Qed.
+
+  (* Here's some fun existential statements: *)
+  Lemma test14 : exists w, Mem w work_week.
+  Proof.
+    exists Monday.
+    (* Wait, we can't see the inside of work week! *)
+    unfold work_week.
+    (* Ok this works *)
+    apply Mem_head.
+  Qed.
+
+  (* This is harder! We'll be able to prove this easily once we have the
+     theorems.
+   *)
+  Lemma test15 : exists w, ~ (Mem w work_week).
+  Proof.
+  Abort.
+  
   (* The theorems we want are these: *)
   Theorem is_a_member_correct : forall w l, is_a_member w l = true -> Mem w l.
   Proof.
