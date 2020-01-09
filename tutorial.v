@@ -100,6 +100,9 @@ Section Basics.
     | _ => false
     end.
 
+
+  Notation "w1 == w2" := (eq_wd w1 w2)(at level 10).
+  
   (* How about a length function? This requires a special syntax: *)
   Fixpoint length (l : week_day_list) : nat :=
     match l with
@@ -113,7 +116,7 @@ Section Basics.
   Fixpoint is_a_member (w : week_day) (l : week_day_list) : bool :=
     match l with
     | [] => false
-    | Cons w' ws => eq_wd w w' || is_a_member w ws
+    | Cons w' ws => w == w' || is_a_member w ws
     end.
 
   (* Let's test it: *)
@@ -228,7 +231,7 @@ Section Basics.
   Qed.
 
   (* How about this? *)
-  Lemma test5 : forall x : week_day, eq_wd x x = true.
+  Lemma test5 : forall x : week_day, x == x = true.
   Proof.
     intros x.
     (* compute. *) (* uh oh *)
@@ -256,7 +259,7 @@ Section Basics.
   Qed.
 
   (* Let's try again *)
-  Lemma test5' : forall x : week_day, eq_wd x x = true.
+  Lemma test5' : forall x : week_day, x == x = true.
   Proof.
     intros x.
     (* Because each case can be handled with the same tactic,
@@ -321,7 +324,7 @@ Section Basics.
   Qed.
 
   (* All right we're ready for some serious stuff *) 
-  Lemma first_real_lemma : forall x y, x = y -> eq_wd x y = true.
+  Lemma first_real_lemma : forall x y, x = y -> x == y = true.
   Proof.
     intros x y.
     intros H.
@@ -332,7 +335,7 @@ Section Basics.
     
   
   (* The other direction is harder! *)
-  Lemma second_real_lemma : forall x y, eq_wd x y = true -> x = y.
+  Lemma second_real_lemma : forall x y, x == y = true -> x = y.
   Proof.
     intros x y.
     intro H.
@@ -405,7 +408,7 @@ Section Basics.
     (* - compute. *)
     (*   intro H; inversion H. *)
     (* - simpl. *)
-    (*   case_eq (eq_wd w w0); intros. *)
+    (*   case_eq (w == w0); intros. *)
     (*   + assert (w = w0). *)
     (*     apply second_real_lemma. *)
     (*     apply H. *)
@@ -426,8 +429,44 @@ Section Basics.
     (*   reflexivity. *)
     (* - simpl. *)
     (*   rewrite IHMem. *)
-    (*   case (eq_wd w w'); reflexivity. *)
+    (*   case (w == w'); reflexivity. *)
   Abort.
 
 
-  (* Need to learn: simpl, induction *)
+  (*
+    To carry out these proofs, we need 2 addional tactics:
+    - simpl, which is a special version of compute
+    - induction, which is how we prove things about infinite types
+   *)
+
+  (* The simpl tactic evaluates a program, but keeps in in a more compact form, unfolding only when needed: *)
+  Eval compute in is_a_member.
+  Eval simpl in is_a_member.
+  Eval compute in fun w l => is_a_member w (Cons Monday l).
+  Eval simpl in fun w l => is_a_member w (Cons Monday l).
+
+  (* Let's assume this for now (though it's not hard to prove with the right tools) *)
+  Lemma n_leq_n_plus_1 : forall n m, n < m -> n + 1 < m + 1.
+  Proof.
+  Admitted.
+
+  (* And let's assume this as well: *)
+  Lemma zero_leq_1 : 0 < 1.
+  Proof.
+  Admitted.
+  
+  (* induction: like it says on the tin! *)
+  Lemma cons_len_gt : forall (w : week_day) (l : week_day_list),
+      length l < length (Cons w l).
+  Proof.
+    simpl.
+    intros w l.
+    induction l.
+    - simpl.
+      apply zero_leq_1.
+    - simpl.
+      apply n_leq_n_plus_1.
+      apply IHl.
+  Qed.
+
+  (* Now we're ready for the proofs! *)
