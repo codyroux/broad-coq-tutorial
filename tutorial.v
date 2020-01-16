@@ -1,5 +1,5 @@
 
-Require Import Arith Bool.
+Require Import Bool.
 
 Section Basics.
 
@@ -33,14 +33,14 @@ Section Basics.
   | Sunday : week_day.
 
   (* And we can define functions *)
-  Definition add_one (x : nat) := x + 1.
-  Definition return_monday (w : week_day) := Monday.
+  Definition add_one (x : nat) : nat := x + 1.
+  Definition return_monday (w : week_day) : week_day := Monday.
 
   Check add_one.
   Check return_monday.
 
   (* We can work by cases over sum types. *)
-  Definition is_monday (w : week_day) :=
+  Definition is_monday (w : week_day) : bool :=
     match w with
     | Monday => true
     | _ => false
@@ -116,7 +116,7 @@ Section Basics.
   Fixpoint is_a_member (w : week_day) (l : week_day_list) : bool :=
     match l with
     | [] => false
-    | Cons w' ws => w == w' || is_a_member w ws
+    | Cons w' ws => if w == w' then true else is_a_member w ws
     end.
 
   (* Let's test it: *)
@@ -128,8 +128,8 @@ Section Basics.
   Check (Monday = Monday).
 
   (* The Prop type is the type of *specifications*. It is *not* bool! *)
-  Check (forall w, w = Monday).
-  Check (exists w, w = Monday).
+  Check (forall w : week_day, w = Monday).
+  Check (exists w : week_day, w = Monday).
 
   (* The basic  propositional connectives: *)
   (* True. Always satisfied. *)
@@ -144,7 +144,7 @@ Section Basics.
   
   (* Obviously, we can state specifications about infinite types as well: *)
 
-  Check (forall l : week_day_list, l = [] \/ exists w l', l = Cons w l').
+  Check (forall l : week_day_list, l = [] \/ exists (w : week_day) (l' : week_day_list), l = Cons w l').
 
   (* Some of these specifications are satisfied, some are not. *)
 
@@ -304,7 +304,7 @@ Section Basics.
     - apply H.
   Qed.
 
-  Lemma test10 : forall x y, x = Monday -> y = x -> y = Monday.
+  Lemma test10 : forall x y : week_day, x = Monday -> y = x -> y = Monday.
   Proof.
     intros x y H1 H2.
     (* Rewrite replaces the lhs of an equality by its rhs *)
@@ -324,7 +324,7 @@ Section Basics.
   Qed.
 
   (* All right we're ready for some serious stuff *) 
-  Lemma first_real_lemma : forall x y, x = y -> x == y = true.
+  Lemma first_real_lemma : forall x y : week_day, x = y -> x == y = true.
   Proof.
     intros x y.
     intros H.
@@ -335,7 +335,7 @@ Section Basics.
     
   
   (* The other direction is harder! *)
-  Lemma second_real_lemma : forall x y, x == y = true -> x = y.
+  Lemma second_real_lemma : forall x y : week_day, x == y = true -> x = y.
   Proof.
     intros x y.
     intro H.
@@ -371,20 +371,20 @@ Section Basics.
   (* Let's show correctness of our membership function! But first we need to *specify* membership. *)
   (* To do this, we specify an *inductive predicate*, which describes all the ways an element can be in a list. *)
   (* We can again use the keyword inductive. *)
-  Inductive Mem : forall (w : week_day) (l : week_day_list), Prop :=
-  | Mem_head : forall w l, Mem w (Cons w l)
-  | Mem_tail : forall w w' l, Mem w l -> Mem w (Cons w' l).
+  Inductive Mem : week_day -> week_day_list -> Prop :=
+  | Mem_head : forall (w : week_day) (l : week_day_list), Mem w (Cons w l)
+  | Mem_tail : forall (w w' : week_day) (l : week_day_list), Mem w l -> Mem w (Cons w' l).
 
 
   (* We can apply constructors of mem like lemmas *)
-  Lemma test13 : Mem Monday [Tuesday; Monday; Thursday].
+  Lemma test13 : Mem Tuesday [Monday; Tuesday; Thursday].
   Proof.
     apply Mem_tail.
     apply Mem_head.
   Qed.
 
   (* Here's some fun existential statements: *)
-  Lemma test14 : exists w, Mem w work_week.
+  Lemma test14 : exists w : week_day, Mem w work_week.
   Proof.
     exists Monday.
     (* Wait, we can't see the inside of work week! *)
@@ -396,40 +396,19 @@ Section Basics.
   (* This is harder! We'll be able to prove this easily once we have the
      theorems.
    *)
-  Lemma test15 : exists w, ~ (Mem w work_week).
+  Lemma test15 : exists w : week_day, ~ (Mem w work_week).
   Proof.
   Abort.
   
   (* The theorems we want are these: *)
-  Theorem is_a_member_correct : forall w l, is_a_member w l = true -> Mem w l.
+  Theorem is_a_member_correct : forall (w : week_day) (l : week_day_list),
+      is_a_member w l = true -> Mem w l.
   Proof.
-    (* intros w l. *)
-    (* induction l. *)
-    (* - compute. *)
-    (*   intro H; inversion H. *)
-    (* - simpl. *)
-    (*   case_eq (w == w0); intros. *)
-    (*   + assert (w = w0). *)
-    (*     apply second_real_lemma. *)
-    (*     apply H. *)
-    (*     rewrite H1. *)
-    (*     apply Mem_head. *)
-    (*   + simpl in H0. *)
-    (*     apply Mem_tail. *)
-    (*     apply IHl. *)
-    (*     apply H0. *)
   Abort.
 
-  Theorem is_a_member_complete : forall w l, Mem w l -> is_a_member w l = true.
+  Theorem is_a_member_complete : forall (w : week_day) (l : week_day_list),
+      Mem w l -> is_a_member w l = true.
   Proof.
-    (* intros w l H; induction H. *)
-    (* - simpl. *)
-    (*   rewrite test5. *)
-    (*   simpl. *)
-    (*   reflexivity. *)
-    (* - simpl. *)
-    (*   rewrite IHMem. *)
-    (*   case (w == w'); reflexivity. *)
   Abort.
 
 
@@ -446,7 +425,7 @@ Section Basics.
   Eval simpl in fun w l => is_a_member w (Cons Monday l).
 
   (* Let's assume this for now (though it's not hard to prove with the right tools) *)
-  Lemma n_leq_n_plus_1 : forall n m, n < m -> n + 1 < m + 1.
+  Lemma n_leq_n_plus_1 : forall n m : nat, n < m -> n + 1 < m + 1.
   Proof.
   Admitted.
 
@@ -470,3 +449,38 @@ Section Basics.
   Qed.
 
   (* Now we're ready for the proofs! *)
+
+  Theorem is_a_member_correct : forall (w : week_day) (l : week_day_list),
+      is_a_member w l = true -> Mem w l.
+  Proof.
+    intros w l.
+    induction l.
+    - compute.
+      intro H; inversion H.
+    - simpl.
+      case_eq (w == w0); intros.
+      + assert (w = w0).
+        apply second_real_lemma.
+        apply H.
+        rewrite H1.
+        apply Mem_head.
+      + simpl in H0.
+        apply Mem_tail.
+        apply IHl.
+        apply H0.
+  Qed.
+
+  Theorem is_a_member_complete : forall (w : week_day) (l : week_day_list),
+      Mem w l -> is_a_member w l = true.
+  Proof.
+    intros w l H; induction H.
+    - simpl.
+      rewrite test5.
+      simpl.
+      reflexivity.
+    - simpl.
+      rewrite IHMem.
+      case (w == w'); reflexivity.
+  Qed.
+
+End Basics.
