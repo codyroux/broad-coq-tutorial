@@ -179,8 +179,8 @@ Section Basics.
      roughly, one can try certain tactics based on the *shape* of the goal and the
      hypotheses. The breakdown is like this:
 
-     |               |   in goal   |   in hypotheses   |
-     |---------------+---------+---------------------- |
+     | formula shape |   in goal   |   in hypotheses   |
+     |---------------+-------------+------------------ |
      | A -> B        |  intros     |      apply        |
      | A /\ B        |  split      |     destruct      |
      | A \/ B        |  left/right |     destruct      |
