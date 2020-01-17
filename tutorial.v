@@ -448,6 +448,15 @@ Section Basics.
       apply IHl.
   Qed.
 
+  
+Lemma eq_cases : forall x y, (x == y = true) \/ (x == y = false).
+Proof.
+  intros x y.
+  destruct (x == y).
+  - left; reflexivity.
+  - right; reflexivity.
+Qed.
+
   (* Now we're ready for the proofs! *)
 
   Theorem is_a_member_correct : forall (w : week_day) (l : week_day_list),
@@ -458,16 +467,17 @@ Section Basics.
     - compute.
       intro H; inversion H.
     - simpl.
-      case_eq (w == w0); intros.
-      + assert (w = w0).
-        apply second_real_lemma.
-        apply H.
+      assert (H := eq_cases w w0).
+      destruct H.
+      + intro H0.
+        assert (w = w0) by (apply second_real_lemma; exact H).
         rewrite H1.
         apply Mem_head.
-      + simpl in H0.
+      + rewrite H.
+        intro H1.
         apply Mem_tail.
         apply IHl.
-        apply H0.
+        apply H1.
   Qed.
 
   Theorem is_a_member_complete : forall (w : week_day) (l : week_day_list),
@@ -480,7 +490,7 @@ Section Basics.
       reflexivity.
     - simpl.
       rewrite IHMem.
-      case (w == w'); reflexivity.
+      destruct (w == w'); reflexivity.
   Qed.
 
 End Basics.
