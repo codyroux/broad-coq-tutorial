@@ -5,14 +5,14 @@ Import ListNotations.
 Section Sorting.
 
   Check (list nat).
-  
+
   (* This is one of many possible definitions of Sorted.
      It's a useful exercise to prove they are equivalent! *)
   Inductive Sorted : list nat -> Prop :=
   | nil_sorted : Sorted []
   | singleton_sorted : forall a, Sorted [a]
   | pair_sorted : forall a b l, a <= b -> Sorted (b::l) -> Sorted (a::b::l).
-  
+
   Hint Constructors Sorted.
 
   Fixpoint insert (a : nat) (l : list nat) : list nat :=
@@ -35,16 +35,16 @@ Section Sorting.
   SearchAbout Bool.reflect.
 
   SearchAbout (_ < _ -> _ <= _).
-  
+
   Hint Resolve Nat.lt_le_incl.
-  
+
   (* Our goal is this: *)
   Theorem sorted_sort : forall l, Sorted (sort l).
   Proof.
     induction l.
     - auto.
     - simpl. (* This is doomed to fail, but let's try anyways, to see how *)
-      
+
       unfold insert.
       case_eq (sort l); auto.
       intros a0 l0 H1.
@@ -89,7 +89,7 @@ Section Sorting.
   Qed.
 
   Hint Resolve perm_insert.
-  
+
   Theorem perm_sort : forall l, l ~ sort l.
   Proof.
     intro l; induction l; simpl; auto.
