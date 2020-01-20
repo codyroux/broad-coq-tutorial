@@ -16,7 +16,7 @@ Section Basics.
 
   (* Every top-level command starts with a capital letter and ends with a period. *)
   (* Grammar was very important to the original implementers... *)
-  
+
   (* No side effects though, so no printing, scanning or reading from a file! *)
   Fail Check print.
 
@@ -86,7 +86,7 @@ Section Basics.
   Notation "[ w1 ; w2 ; .. ; wn ]" := (Cons w1 (Cons w2 .. (Cons wn Nil) .. )).
 
   Definition work_week := [Monday; Tuesday; Wednesday; Thursday; Friday].
-  
+
   (* All right, let's define some funner things. *)
 
   Definition eq_wd (w1 w2 : week_day) : bool :=
@@ -103,7 +103,7 @@ Section Basics.
 
 
   Notation "w1 == w2" := (eq_wd w1 w2)(at level 10).
-  
+
   (* How about a length function? This requires a special syntax: *)
   Fixpoint length (l : week_day_list) : nat :=
     match l with
@@ -142,7 +142,7 @@ Section Basics.
   (* forall x : A, P x. Satisfied if for an *aribitrary* x (of type A), P x is satisfied. *)
   (* exists x : A, P x. Satisfied if there is some *specific* a such that P a is satisfied. *)
 
-  
+
   (* Obviously, we can state specifications about infinite types as well: *)
 
   Check (forall l : week_day_list, l = [] \/ exists (w : week_day) (l' : week_day_list), l = Cons w l').
@@ -152,13 +152,13 @@ Section Basics.
   (* We give some basic tools to prove some of these specs: *)
 
 
-  
+
   Lemma test1 : forall x y : week_day, x = y -> x = y.
   Proof.
     (* We now have a proof obligation! *)
     (* This puts us in proof mode, where instead of commands, *tactics* are expected. *)
     (* These use a different language, called Ltac. *)
-    
+
     (* To prove a forall, you give generic names to the variables,
        and prove the goal for these generic variables.
        This is called *introducing* the variables.
@@ -273,7 +273,7 @@ Section Basics.
 
   (* We can declare variables of any type, including specification/predicates variables! *)
   Variables P Q R : Prop.
-  
+
   Lemma test6 : P -> Q -> P /\ Q.
   Proof.
     intros H1 H2.
@@ -355,7 +355,7 @@ Section Basics.
     rewrite <- H2 in H1.
     apply H1.
   Qed.
-  
+
   (* More proofs involving equalities *)
   Lemma test11 : Monday = Tuesday -> False.
   Proof.
@@ -366,7 +366,7 @@ Section Basics.
     inversion H.
   Qed.
 
-  (* All right we're ready for some serious stuff *) 
+  (* All right we're ready for some serious stuff *)
   Lemma first_real_lemma : forall x y : week_day, x = y -> x == y = true.
   Proof.
     intros x y.
@@ -375,8 +375,8 @@ Section Basics.
     (* We can just apply our Lemma test5 here! *)
     apply test5.
   Qed.
-    
-  
+
+
   (* The other direction is harder! *)
   Lemma second_real_lemma : forall x y : week_day, x == y = true -> x = y.
   Proof.
@@ -389,7 +389,7 @@ Section Basics.
     (*     compute in H. *)
     (*     inversion H. *)
     (*     (* ugh. *) *)
-    
+
     (* This fails *)
     (* destruct x; destruct y; reflexivity. *)
 
@@ -410,7 +410,7 @@ Section Basics.
     (* Ok not overwhelming, but we can use this idea to prove harder things! *)
   Qed.
 
-  
+
   (* Let's show correctness of our membership function! But first we need to *specify* membership. *)
   (* To do this, we specify an *inductive predicate*, which describes all the ways an element can be in a list. *)
   (* We can again use the keyword inductive. *)
@@ -439,14 +439,14 @@ Section Basics.
     (* Ok this works *)
     apply Mem_head.
   Qed.
-  
+
   (* This is harder as well. We'll be able to prove this easily once we have the
      theorems.
    *)
   Lemma test15 : exists w : week_day, ~ (Mem w work_week).
   Proof.
   Abort.
-  
+
   (* The theorems we want are these: *)
   Theorem is_a_member_correct : forall (w : week_day) (l : week_day_list),
       is_a_member w l = true -> Mem w l.
@@ -457,6 +457,23 @@ Section Basics.
       Mem w l -> is_a_member w l = true.
   Proof.
   Abort.
+
+  (*
+
+    It might seem strange to specify the relatively simple is_a_member
+    function in terms of the almost-as-complicated Mem predicate.
+
+    HOWEVER, in real applications (e.g. CompCert) the specification is
+    *vastly* simpler than the implementation. In addition we are then
+    able to increasingly complicate the implementation, say by adding
+    more efficiencies, but the specification should stay the same.
+
+    It might even be a good idea to prove the simple implementation
+    first, as a kind of "co-validation" of the spec and program. Then
+    when we move to more complicated implementations, we can trust the
+    specification more.
+
+ *)
 
 
   (*
@@ -480,7 +497,7 @@ Section Basics.
   Lemma zero_leq_1 : 0 < 1.
   Proof.
   Admitted.
-  
+
   (* induction: like it says on the tin! *)
   Lemma cons_len_gt : forall (w : week_day) (l : week_day_list),
       length l < length (Cons w l).
@@ -495,7 +512,7 @@ Section Basics.
       apply IHl.
   Qed.
 
-  
+
 Lemma eq_cases : forall x y, (x == y = true) \/ (x == y = false).
 Proof.
   intros x y.
@@ -565,5 +582,5 @@ Qed.
       inversion H0.
       (* Easy peezy! *)
   Qed.
-    
+
 End Basics.
