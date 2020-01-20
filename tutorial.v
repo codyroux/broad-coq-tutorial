@@ -1,3 +1,4 @@
+(* Copy paste this whole buffer in https://x80.org/collacoq/ to run interactively *)
 From Coq Require Import Bool.
 
 Section Basics.
@@ -51,7 +52,8 @@ Section Basics.
 
   (* There is a powerful search feature, which takes types and returns
      potentially useful functions with similar types *)
-  SearchAbout (bool -> bool).
+  (* Sadly, this does not work in the online version... *)
+  (* SearchAbout (bool -> bool). *)
 
   (* We can define types which may be recursive, e.g. the type of lists *)
   Inductive week_day_list :=
@@ -242,6 +244,7 @@ Section Basics.
        we handle each case with the usual technique. *)
     - compute.
       reflexivity.
+    (* We are done with this dash, so we can move to the next one... *)
     - compute.
       reflexivity.
     - compute.
@@ -267,9 +270,12 @@ Section Basics.
   Qed.
 
   (* Let's play with some logical connectives *)
-  Lemma test6 : forall x y z : week_day, x = y -> y = z -> x = y /\ y = z.
+
+  (* We can declare variables of any type, including specification/predicates variables! *)
+  Variables P Q R : Prop.
+  
+  Lemma test6 : P -> Q -> P /\ Q.
   Proof.
-    intros x y z.
     intros H1 H2.
     (* This breaks a conjunction into 2 goals *)
     split.
@@ -277,32 +283,54 @@ Section Basics.
     - apply H2.
   Qed.
 
-  Lemma test7 : forall x y z : week_day, x = y -> x = y \/ y = z.
+  Lemma test7 : P -> P \/ Q.
   Proof.
-    intros x y z H.
+    intros H.
     (* We need to pick a side! *)
     (* right. (* uh oh *) *)
     left.
     apply H.
   Qed.
 
-  Lemma test8 : forall x y z : week_day, x = y /\ y = z -> y = z.
+  Lemma test8 : P /\ Q -> Q.
   Proof.
-    intros x y z H.
+    intros H.
     (* Oh hey, destruct works here too! *)
     destruct H.
     apply H0.
   Qed.
 
-  Lemma test9 : forall x y : week_day, x = y \/ x = y -> x = y.
+  Lemma test9 : P \/ P -> P.
   Proof.
-    intros x y H.
+    intros H.
     (* Here destruct creates 2 subgoals, depending on which disjunct is true *)
     destruct H.
     - apply H.
     - apply H.
   Qed.
 
+  (* A little less trivial *)
+  Lemma test9' : P \/ Q -> Q \/ P.
+  Proof.
+    intros H.
+    destruct H.
+    - right; apply H.
+    - left; apply H.
+  Qed.
+
+  (* And a classic! *)
+  Lemma test9'' : (P /\ Q) \/ R -> (P \/ R) /\ (Q \/ R).
+  Proof.
+    intros H.
+    destruct H.
+    - destruct H.
+      split.
+      -- left; apply H.
+      -- left; apply H0.
+    - split; right; apply H.
+  Qed.
+
+  (* Let's do some more interesting things with equality: *)
   Lemma test10 : forall x y : week_day, x = Monday -> y = x -> y = Monday.
   Proof.
     intros x y H1 H2.
@@ -311,8 +339,24 @@ Section Basics.
     rewrite H1.
     reflexivity.
   Qed.
+
+  (* We can also rewrite *inside* hypotheses *)
+  Lemma test10' : forall x y : week_day, x = Monday -> y = x -> y = Monday.
+  Proof.
+    intros x y H1 H2.
+    rewrite H1 in H2.
+    apply H2.
+  Qed.
+
+  (* Oh and we can rewrite backwards as well *)
+  Lemma test10'' : forall x y : week_day, x = Monday -> y = x -> y = Monday.
+  Proof.
+    intros x y H1 H2.
+    rewrite <- H2 in H1.
+    apply H1.
+  Qed.
   
-  (* Proofs involving equalities *)
+  (* More proofs involving equalities *)
   Lemma test11 : Monday = Tuesday -> False.
   Proof.
     intro H.
@@ -382,7 +426,11 @@ Section Basics.
     apply Mem_head.
   Qed.
 
-  (* Here's some fun existential statements: *)
+  (* This one is significantly harder. We'll handle it later! *)
+  Lemma test13' : forall (w : week_day), Mem w [Monday; Tuesday] -> w = Monday \/ w = Tuesday.
+  Proof.
+  Abort.
+
   Lemma test14 : exists w : week_day, Mem w work_week.
   Proof.
     exists Monday.
@@ -391,8 +439,8 @@ Section Basics.
     (* Ok this works *)
     apply Mem_head.
   Qed.
-
-  (* This is harder! We'll be able to prove this easily once we have the
+  
+  (* This is harder as well. We'll be able to prove this easily once we have the
      theorems.
    *)
   Lemma test15 : exists w : week_day, ~ (Mem w work_week).
@@ -468,15 +516,15 @@ Qed.
     - simpl.
       assert (H := eq_cases w w0).
       destruct H.
-      + intro H0.
-        assert (w = w0) by (apply second_real_lemma; exact H).
-        rewrite H1.
-        apply Mem_head.
-      + rewrite H.
-        intro H1.
-        apply Mem_tail.
-        apply IHl.
-        apply H1.
+      -- intro H0.
+         assert (w = w0) by (apply second_real_lemma; exact H).
+         rewrite H1.
+         apply Mem_head.
+      -- rewrite H.
+         intro H1.
+         apply Mem_tail.
+         apply IHl.
+         apply H1.
   Qed.
 
   Theorem is_a_member_complete : forall (w : week_day) (l : week_day_list),
@@ -492,4 +540,30 @@ Qed.
       destruct (w == w'); reflexivity.
   Qed.
 
+  (* Let's try to prove the hard lemmas now: *)
+
+  Lemma test13' : forall (w : week_day), Mem w [Monday; Tuesday] -> w = Monday \/ w = Tuesday.
+  Proof.
+    intros w H.
+    assert (is_a_member w [Monday; Tuesday] = true).
+    - apply is_a_member_complete; apply H.
+    - revert H0.
+      destruct w; compute; intros H1; try inversion H1.
+      (* Nice! *)
+      -- left; reflexivity.
+      -- right; reflexivity.
+  Qed.
+
+
+  Lemma test15 : exists w : week_day, ~ (Mem w work_week).
+  Proof.
+    exists Sunday.
+    intro H.
+    assert (is_a_member Sunday work_week = true).
+    - apply is_a_member_complete; apply H.
+    - compute in H0.
+      inversion H0.
+      (* Easy peezy! *)
+  Qed.
+    
 End Basics.
