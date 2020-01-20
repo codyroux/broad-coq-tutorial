@@ -1,4 +1,4 @@
-Require Import List Lia Arith Permutation.
+From Coq Require Import List Lia Arith Permutation.
 
 Import ListNotations.
 

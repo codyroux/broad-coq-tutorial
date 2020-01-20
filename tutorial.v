@@ -1,5 +1,4 @@
-
-Require Import Bool.
+From Coq Require Import Bool.
 
 Section Basics.
 
