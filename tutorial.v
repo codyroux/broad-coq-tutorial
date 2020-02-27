@@ -53,7 +53,7 @@ Section Basics.
   (* There is a powerful search feature, which takes types and returns
      potentially useful functions with similar types *)
   (* Sadly, this does not work in the online version... *)
-  (* SearchAbout (bool -> bool). *)
+  (* Search (bool -> bool). *)
 
   (* We can define types which may be recursive, e.g. the type of lists *)
   Inductive week_day_list :=
@@ -172,6 +172,8 @@ Section Basics.
     (* We are done, there are no more goals! We use Qed to mark the end of a proof *)
   Qed.
 
+  Print test1.
+
   (* We can check that test1 is indeed a proof of our specification by using the Check command *)
   Check test1.
 
@@ -207,6 +209,8 @@ Section Basics.
   Proof.
     Fail reflexivity.
   Abort.
+
+  Print return_monday.
 
   (* We can also perform computation steps in proofs, in order to
      prove things about functions: *)
@@ -325,8 +329,8 @@ Section Basics.
     destruct H.
     - destruct H.
       split.
-      -- left; apply H.
-      -- left; apply H0.
+      + left; apply H.
+      + left; apply H0.
     - split; right; apply H.
   Qed.
 
@@ -377,6 +381,11 @@ Section Basics.
   Qed.
 
 
+  Locate "==".
+
+  Check eq_wd.
+  Print eq_wd.
+
   (* The other direction is harder! *)
   Lemma second_real_lemma : forall x y : week_day, x == y = true -> x = y.
   Proof.
@@ -400,6 +409,18 @@ Section Basics.
     destruct x; destruct y; try reflexivity; compute in H; congruence.
     (* Cool! *)
   Qed.
+
+
+  Goal forall x y : week_day, x <> y -> x == y = false.
+  Proof.
+    intros.
+    case_eq (x == y); intros.
+    - contradict H.
+      apply second_real_lemma.
+      apply H0.
+    - reflexivity.
+  Qed.
+
 
   (* Now we have a program which we have proven correct! We can use this to prove some theorems! *)
   Lemma test12 : Monday = Monday.
@@ -456,6 +477,12 @@ Section Basics.
   Theorem is_a_member_complete : forall (w : week_day) (l : week_day_list),
       Mem w l -> is_a_member w l = true.
   Proof.
+  Abort.
+
+
+  Goal forall w, Mem w [Wednesday; Monday; Tuesday] -> Mem w work_week.
+  Proof.
+    unfold work_week.
   Abort.
 
   (*
@@ -533,11 +560,11 @@ Qed.
     - simpl.
       assert (H := eq_cases w w0).
       destruct H.
-      -- intro H0.
+      + intro H0.
          assert (w = w0) by (apply second_real_lemma; exact H).
          rewrite H1.
          apply Mem_head.
-      -- rewrite H.
+      + rewrite H.
          intro H1.
          apply Mem_tail.
          apply IHl.
@@ -567,8 +594,8 @@ Qed.
     - revert H0.
       destruct w; compute; intros H1; try inversion H1.
       (* Nice! *)
-      -- left; reflexivity.
-      -- right; reflexivity.
+      + left; reflexivity.
+      + right; reflexivity.
   Qed.
 
 

@@ -30,11 +30,11 @@ Section Sorting.
 
   Eval compute in (sort [3;4;5;2;5;6;3;2;2;46;87;8;0]).
 
-  SearchAbout (_ <=? _).
-  SearchAbout (BoolSpec).
-  SearchAbout Bool.reflect.
+  Search (_ <=? _).
+  Search (BoolSpec).
+  Search Bool.reflect.
 
-  SearchAbout (_ < _ -> _ <= _).
+  Search (_ < _ -> _ <= _).
 
   Hint Resolve Nat.lt_le_incl.
 
@@ -73,7 +73,7 @@ Section Sorting.
   (* Same remark as for Sorted: there are many possible equivalent definitions here! *)
   Print Permutation.
 
-  SearchAbout Permutation.
+  Search Permutation.
 
   Notation "l1 ~ l2" := (Permutation l1 l2)(at level 80).
 
@@ -85,7 +85,7 @@ Section Sorting.
     setoid_rewrite H.
     setoid_rewrite perm_swap.
     constructor.
-    apply IHl; auto.
+    auto.
   Qed.
 
   Hint Resolve perm_insert.
