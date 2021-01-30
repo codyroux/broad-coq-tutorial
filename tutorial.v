@@ -22,7 +22,12 @@ Fail Check print.
 the Coq *system* to print a definition. *)
 Print bool.
 
-(* There are good reasons for this, which we will go into later *)
+(*
+
+  NB: Every piece of data in a program is *constant* and *immutable*
+  There are good reasons for this, which we will go into later.
+
+ *)
 
 (* We can define types. This is a simple sum type *)
 Inductive week_day :=
