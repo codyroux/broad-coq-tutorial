@@ -290,14 +290,29 @@ Proof.
 Abort.
 
 (*
-  There is still a lot to learn! You can check out the resources on https://coq.inria.fr/,
-  most notably the tutorials on https://coq.inria.fr/documentation.
 
-  You can try more online stuff on rhino-coq: https://x80.org/rhino-coq/
+  Finally, it's important to note that I purposefully hid a number of
+  powerful tactics from you, for pedagogical reasons. The easiest of
+  these is [auto], which tries to apply simple steps to finish a
+  goal. Exercise: how much easier are the lemmas to prove using
+  [auto]?
 
-  I have a few things on my github: https://github.com/codyroux?tab=repositories&q=&type=&language=coq
+*)
 
-  Or create an account on https://coq.zulipchat.com, and ask questions there!
+(*
+
+  There is still a lot to learn! You can check out the resources on
+  https://coq.inria.fr/, most notably the tutorials on
+  https://coq.inria.fr/documentation.
+
+  You can try more online stuff on rhino-coq:
+  https://x80.org/rhino-coq/
+
+  I have a few things on my github:
+  https://github.com/codyroux?tab=repositories&q=&type=&language=coq
+
+  Or create an account on https://coq.zulipchat.com, and ask questions
+  there!
 
   Go forth and prove!
 
