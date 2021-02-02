@@ -3,6 +3,17 @@ From Coq Require Import Arith Bool.
 
 (* At its core, Coq is a *typed* programing language *)
 (* There are a few (not many!) built-in types *)
+(*
+
+   On the online version, you can move your cursor up and down with
+   Alt+p and Alt+n respectively.
+
+   The result of the command should show up in the lower right hand
+   side of the screen.
+
+   Remember to leave it time to load up at the very beginning!
+
+ *)
 Check 3.
 Check 3 + 4.
 Check true.
