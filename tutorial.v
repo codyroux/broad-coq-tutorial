@@ -153,7 +153,7 @@ Check (exists w, w = Monday).
 (* P/\Q. Provable if both P and Q are provable. *)
 (* P -> Q. Provable if, when *assuming* P is provable, then so is Q. *)
 (* ~P. Provable if P is *never* provable *)
-(* forall x : A, P x. Provable if for an *aribitrary* x (of type A), P x is provable. *)
+(* forall x : A, P x. Provable if for an *arbitrary* x (of type A), P x is provable. *)
 (* exists x : A, P x. Provable if there is some *specific* a such that P a is provable. *)
 
 
@@ -189,7 +189,7 @@ Abort.
      | exists x, P x |  exists t   |     destruct      |
      | t = u         | reflexivity | rewrite/inversion |
 
-     but of course, these will not alway suffice in all situations.
+     but of course, these will not always suffice in all situations.
  *)
 
 
@@ -237,7 +237,7 @@ Lemma test8 : forall x y z : week_day, x = y /\ y = z -> y = z.
 Proof.
 Abort.
 
-(* This one is a litte tougher! tactic order matters! *)
+(* This one is a little tougher! tactic order matters! *)
 Lemma test9 : forall x y z : week_day, x = y \/ x = z -> x = z \/ x = y.
 Proof.
 Abort.
@@ -274,7 +274,7 @@ Inductive Mem : forall (w : week_day) (l : week_day_list), Prop :=
 | Mem_tail : forall w w' l, Mem w l -> Mem w (Cons w' l).
 
 
-(* We can apply constructors of mem like lemmas *)
+(* We can apply constructors of Mem like lemmas *)
 Lemma test13 : Mem Monday [Tuesday; Monday; Thursday].
 Proof.
 Abort.
