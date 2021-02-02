@@ -155,6 +155,9 @@ Check (exists w, w = Monday).
 (* ~P. Provable if P is *never* provable *)
 (* forall x : A, P x. Provable if for an *arbitrary* x (of type A), P x is provable. *)
 (* exists x : A, P x. Provable if there is some *specific* a such that P a is provable. *)
+(* a = b. Provable if, in fact, a is equal to b. Not to be confused
+   with ":=" which is how we define functions and constants (and is
+   *not* a connective).  *)
 
 
 (* Obviously, we can state specifications about infinite types as well: *)
