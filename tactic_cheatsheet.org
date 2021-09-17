@@ -1,5 +1,5 @@
 |               |   in goal   |   in hypotheses   |
-|---------------+---------+---------------------- |
+|---------------+-------------+-------------------|
 | A -> B        |  intros     |      apply        |
 | A /\ B        |  split      |     destruct      |
 | A \/ B        |  left/right |     destruct      |
